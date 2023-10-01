@@ -3,6 +3,7 @@ import logging
 sys.path.append('../')
 
 import db
+import mq
 import ops 
 
 db.DB_NAME = "../app.db"
@@ -16,11 +17,12 @@ credentials = pika.PlainCredentials(mq_user, mq_pass)
 
 
 def main():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(
-        host='localhost',
-        credentials=credentials
-    ))
-    channel = connection.channel()
+    # connection = pika.BlockingConnection(pika.ConnectionParameters(
+    #     host='localhost',
+    #     credentials=credentials
+    # ))
+    # channel = connection.channel()
+    channel = mq.get_queue()
 
     channel.queue_declare(queue='bids')
 
