@@ -32,10 +32,15 @@ def create_tables():
     FOREIGN KEY (bid_owner)
         REFERENCES users (id)
     )"""
-
+    create_bid_ack = """CREATE TABLE IF NOT EXISTS bid_ack (
+    id INTEGER PRIMARY KEY,
+    qid TEXT NOT NULL,
+    result BOOLEAN NOT NULL CHECK (result IN (0,1))
+    )"""
     db = get_db()
     with db:
         db.execute(create_items)
         db.execute(create_users)
         db.execute(create_bids)
+        db.execute(create_bid_ack)
         db.execute('PRAGMA journal_mode=wal')

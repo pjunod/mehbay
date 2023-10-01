@@ -1,9 +1,12 @@
 from flask import Flask, Response, request, make_response, render_template
 from flask_smorest import abort
 import logging
+import time
 
 import db
 import ops
+
+logger = logging.getLogger()
 
 app = Flask(__name__)
 
@@ -57,7 +60,23 @@ def place_bid():
     '''
     item_data = request.get_json()
 
-    res = ops.bid(**item_data)
+    # res = ops.bid(**item_data)
+    bid_id = ops.bid_publish(**item_data)
+
+    count = 0
+    while (ops.check_bid_ack(bid_id) is False and count <= 5):
+        time.sleep(1)
+        count += 1
+        logger.debug("count is [%s]" % count)
+        logger.debug("polling for bid ack...")
+
+    if count >= 5:
+        logger.debug("Ack polling count timed out")
+        abort(
+            400,
+            message="Ack polling timed out"
+        )
+    res = ops.get_bid_result(bid_id)
     if res:
         return make_response("You're the high bidder!", 200)
     else:
